@@ -1,0 +1,22 @@
+name: spike-eval
+on:
+  workflow_run:
+    workflows: [spike-signal]
+    types: [completed]
+permissions: {}
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    environment: vouch
+    permissions:
+      statuses: write
+    steps:
+      - name: post status
+        env:
+          GH_TOKEN: ${{ github.token }}
+          KEY: ${{ secrets.VOUCH_APP_KEY }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          REPO: ${{ github.repository }}
+        run: |
+          if [ -n "$KEY" ]; then present=yes; else present=no; fi
+          gh api "repos/$REPO/statuses/$SHA" -f state=success -f context=spike/s01 -f description="secret_present=$present"
