@@ -1,0 +1,24 @@
+name: spike-s08
+on:
+  workflow_dispatch:
+  push:
+    branches: [Main]
+    tags: [main]
+permissions: {}
+jobs:
+  envjob:
+    runs-on: ubuntu-latest
+    environment: vouch
+    permissions:
+      statuses: write
+    steps:
+      - name: report secret presence only
+        env:
+          GH_TOKEN: ${{ github.token }}
+          KEY: ${{ secrets.VOUCH_APP_KEY }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+          REF: ${{ github.ref }}
+        run: |
+          if [ -n "$KEY" ]; then present=yes; else present=no; fi
+          gh api "repos/$REPO/statuses/$SHA" -f state=success -f context=spike/s08 -f description="$REF secret_present=$present"
