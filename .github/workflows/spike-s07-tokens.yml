@@ -1,0 +1,31 @@
+name: spike-s07-tokens
+on: workflow_dispatch
+permissions: {}
+jobs:
+  full:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      OWNER: ${{ github.repository_owner }}
+    steps:
+      - run: |
+          note(){ printf '::notice title=%s::%s\n' "$1" "$(printf '%s' "$2" | tr -d '\r\n' | cut -c1-300)"; }
+          note viewer "$(gh api graphql -f query='{viewer{__typename login databaseId}}' 2>&1)"
+          note collaborator "$(gh api "repos/$REPO/collaborators/$OWNER/permission" --jq .permission 2>&1)"
+          note search "$(gh api graphql -f query='query($q:String!){search(query:$q,type:ISSUE,first:1){issueCount}}' -f q="repo:$REPO is:pr" 2>&1)"
+  nocontents:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      NAME: ${{ github.event.repository.name }}
+      OWNER: ${{ github.repository_owner }}
+    steps:
+      - run: |
+          note(){ printf '::notice title=%s::%s\n' "$1" "$(printf '%s' "$2" | tr -d '\r\n' | cut -c1-300)"; }
+          note target "$(gh api graphql -f query='query($o:String!,$n:String!){repository(owner:$o,name:$n){defaultBranchRef{name target{oid}}}}' -f o="$OWNER" -f n="$NAME" 2>&1)"
