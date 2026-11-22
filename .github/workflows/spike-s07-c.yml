@@ -1,0 +1,27 @@
+name: spike-s07-c
+run-name: spike-s07-c ${{ inputs.trial }}
+on:
+  workflow_dispatch:
+    inputs:
+      trial:
+        required: true
+permissions: {}
+jobs:
+  route:
+    runs-on: ubuntu-latest
+    outputs:
+      keys: ${{ steps.r.outputs.keys }}
+    steps:
+      - id: r
+        run: echo 'keys=["pr-1"]' >> "$GITHUB_OUTPUT"
+  worker:
+    needs: route
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        key: ${{ fromJSON(needs.route.outputs.keys) }}
+    concurrency:
+      group: "s07c-${{ matrix.key }}"
+      cancel-in-progress: false
+    steps:
+      - run: sleep 40
