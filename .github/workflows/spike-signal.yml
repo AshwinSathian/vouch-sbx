@@ -1,0 +1,8 @@
+name: spike-signal
+on: pull_request
+permissions: {}
+jobs:
+  signal:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo signal
