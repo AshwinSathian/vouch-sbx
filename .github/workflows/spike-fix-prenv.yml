@@ -1,0 +1,11 @@
+name: spike-fix-prenv
+on: pull_request
+permissions: {}
+jobs:
+  envjob:
+    runs-on: ubuntu-latest
+    environment: vouch
+    steps:
+      - env:
+          KEY: ${{ secrets.VOUCH_APP_KEY }}
+        run: if [ -n "$KEY" ]; then echo "::notice title=secret::present"; else echo "::notice title=secret::absent"; fi
