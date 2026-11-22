@@ -1,0 +1,22 @@
+name: spike-envjob
+on:
+  workflow_dispatch:
+  push:
+    branches: ['s01-env*']
+permissions: {}
+jobs:
+  envjob:
+    runs-on: ubuntu-latest
+    environment: vouch
+    permissions:
+      statuses: write
+    steps:
+      - name: report secret presence only
+        env:
+          GH_TOKEN: ${{ github.token }}
+          KEY: ${{ secrets.VOUCH_APP_KEY }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          if [ -n "$KEY" ]; then present=yes; else present=no; fi
+          gh api "repos/$REPO/statuses/$SHA" -f state=success -f context=spike/s01-envjob -f description="secret_present=$present"
